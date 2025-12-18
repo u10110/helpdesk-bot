@@ -44,7 +44,7 @@ const getOrCreateManager = async (chat) => {
 
 
 const updateClinet = async (chat, contact, vetmanager_id = 0, vetmanager_fullname = '') => {
-	const text = 'UPDATE clients SET phone=$1, account_data=$3, vetmanager_id=$4, vetmanager_fullname=$5  WHERE user_id=$2 RETURNING *'
+	const text = 'UPDATE clients SET phone=$1, account_data=$3, client_id=$4, client_fullname=$5  WHERE user_id=$2 RETURNING *'
 	const values = [ contact, chat.id, chat, Number(vetmanager_id) > 0 ? Number(vetmanager_id)  : 0, vetmanager_fullname.length > 0 ? vetmanager_fullname : '' ]
 	const { rows: [client, ] } = await query(text, values)
 
@@ -56,7 +56,6 @@ export default {
     query,
 	getOrCreateClinet,
 	updateClinet,
-	getOrCreateManager,
-	getClinetVetmanagerID
+	getOrCreateManager
 };
 

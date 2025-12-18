@@ -10,7 +10,8 @@ dotenv.config()
 
 
 const onStart = async (ctx, message) => {
-    if(message.chat.type !== 'group' && message.chat.id !== process.env.ADMIN_GROUP_ID ) {
+
+    if(message.chat.type !== 'group' && message.chat.type !== 'supergroup' && message.chat.id !== process.env.ADMIN_GROUP_ID ) {
 
 		const client = await service.getOrCreateClinet(message.chat)
 		
@@ -44,7 +45,7 @@ const onContactReceived = async (ctx) => {
 
 const welcomeMessage = async (ctx, account) => {
 
-	  await ctx.reply('Здравствуйте ' + account.vetmanager_fullname  + '! Опишите свой вопрос или проблему. Незабудьте сообщить о состоянии питомца, если вы недавно проходили процедуры.', {
+	  await ctx.reply('Здравствуйте ' + account.client_fullname  + '! Опишите свой вопрос или проблему. Незабудьте сообщить о состоянии питомца, если вы недавно проходили процедуры.', {
         reply_markup: { remove_keyboard: true }
     });
 }
@@ -117,7 +118,7 @@ const onClinetMessage = async (ctx) => {
 
 
 				const new_message = await ctx.telegram.sendMessage(client.user_id, 
-					`Вам ответила служба поддержки ТерраВет</b>
+					`Вам ответила служба поддержки
 					\r\n\
 					${manager_message}  `,
 					{
@@ -148,16 +149,10 @@ const onClinetMessage = async (ctx) => {
 	
 		}
 
-		let vetmanager_id = 0;
-		let vetmanager_fullname = '';
+		let client_id = 0;
+		let client_fullname = ctx.message.from.first_name + ' ' + ctx.message.from.last_name;;
 
-		if(client.phone  && client.phone.length > 0){
-			let { id, fullname } = await service.getClinetVetmanagerID(client.phone);
-			vetmanager_id = id;
-			vetmanager_fullname = fullname
-		}
-
-		await service.updateClinet(ctx.message.chat, client.phone, vetmanager_id, vetmanager_fullname)
+		await service.updateClinet(ctx.message.chat, client.phone, client_id, client_fullname)
 
 		if(client) {
 
@@ -179,12 +174,12 @@ const onClinetMessage = async (ctx) => {
 			
 
 			if(photosToSend.length > 0) {
-				const message = client.vetmanager_fullname +  ' (' + client.phone + ', id:<b>' + client.vetmanager_id + '</b>)' +
+				const message = client.client_fullname +  ' (' + client.phone + ', id:<b>' + client.id + '</b>)' +
 				' \r\n\ \r\n\ ' +
 				'<b>' + ( client_message || '' )  + '</b>' 
 				
 
-				photosToSend[0].caption="Фото от " + client.vetmanager_fullname +  ' (' + client.phone +  ', id:' + client.vetmanager_id + ')'
+				photosToSend[0].caption="Фото от " + client.client_fullname +  ' (' + client.phone +  ', id:' + client.id + ')'
 
 					 const new_message_photo = await ctx.telegram.sendMediaGroup(process.env.ADMIN_GROUP_ID, photosToSend)
 					
@@ -204,7 +199,7 @@ const onClinetMessage = async (ctx) => {
 		
 			} else {
 
-				const message =  client.vetmanager_fullname +  ' (' + client.phone + ', id:<b>' + client.vetmanager_id + '</b>)' +
+				const message =  client.client_fullname +  ' (' + client.phone + ', id:<b>' + client.id + '</b>)' +
 				' \r\n\ \r\n\ ' +
 				'<b>' + ( client_message || '' )  + '</b>' 
 				
